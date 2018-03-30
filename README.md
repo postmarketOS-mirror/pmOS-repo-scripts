@@ -1,7 +1,7 @@
 # postmarketOS repository scripts
 
 Here are a bunch of shell scripts, that wrap around [`pmbootstrap`](https://github.com/postmarketOS/pmbootstrap) to build the packages for the official binary package repository.
-You will probably not need this! The scripts are only used by ollieparanoid so far, so they haven't seen much testing and they don't have safety checks.
+**You will probably not need this!** The scripts are only used by ollieparanoid so far, so they haven't seen much testing and they don't have safety checks.
 If you really want to run these, make sure to read every script before execution.
 
 ## `prepare.sh`
