@@ -59,7 +59,7 @@ while true; do
 
 	# All arches
 	for arch in $arches; do
-		for folder in cross main kde maemo luna modem; do
+		for folder in cross main kde maemo luna modem hybris; do
 			# Folder's packages
 			echo ":: $arch $folder"
 			packages=""
