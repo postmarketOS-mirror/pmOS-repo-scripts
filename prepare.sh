@@ -23,7 +23,7 @@ mkdir -p data
 cd data
 
 # Clone pmbootstrap
-[ -d pmbootstrap ] || git clone "https://github.com/postmarketOS/pmbootstrap"
+[ -d pmbootstrap ] || git clone "https://gitlab.com/postmarketOS/pmbootstrap.git"
 
 # Create wrapper script
 if ! [ -e pmb_repo.sh ]; then
