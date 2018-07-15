@@ -20,18 +20,20 @@
 DIR="$(cd $(dirname $0); pwd -P)"
 cd "$DIR"
 
-# Run pmbootstrap
+# Run pmbootstrap (with retries)
 pmb() {
-	echo "> pmbootstrap $@"
-	"$DIR/data/pmb_repo.sh" "$@"
-}
-
-# Get packages from a specific aports folder
-# $1: folder
-# $2: arch (can also be noarch/all)
-get_packages() {
-	( cd "$DIR/data/pmbootstrap/aports";
-	  grep "^arch=" $(find "$1" -name 'APKBUILD') | grep "=.*$2" | cut -d '/' -f2 )
+	max="10"
+	success="false"
+	for i in $(seq 1 "$max"); do
+		[ "$i" != 0 ] &&
+		echo "[$i/$max] pmbootstrap $@"
+		if "$DIR/data/pmb_repo.sh" "$@"; then
+			success="true"
+			break
+		else
+			echo "COMMAND FAILED!"
+		fi
+	done
 }
 
 # Get device packages for a specific architecture
@@ -62,10 +64,7 @@ while true; do
 		for folder in cross main kde maemo luna modem hybris; do
 			# Folder's packages
 			echo ":: $arch $folder"
-			packages=""
-			for archval in "$arch" all noarch; do
-				packages="$packages $(get_packages "$folder" "$archval")"
-			done
+			packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"
 
 			# Remove gcc-* from packages
 			# Workaround: Compiling gcc-x86_64 for armhf (gcc-* for non-native arch in
