@@ -22,15 +22,19 @@ cd "$DIR"
 
 # Run pmbootstrap (with retries)
 pmb() {
-	max="10"
+	max="100"
 	success="false"
 	for i in $(seq 1 "$max"); do
 		[ "$i" != 0 ] &&
 		echo "[$i/$max] pmbootstrap $@"
-		if "$DIR/data/pmb_repo.sh" "$@"; then
+		if "$DIR/data/pmb_repo.sh" --timeout=900 "$@"; then
 			success="true"
 			break
 		else
+			# HACK: often cmake is the issue
+			# this can be removed when pmbootstrap is able to kill
+			# running processes in the chroots
+			sudo killall cmake
 			echo "COMMAND FAILED!"
 		fi
 	done
@@ -61,7 +65,7 @@ while true; do
 
 	# All arches
 	for arch in $arches; do
-		for folder in cross main kde maemo luna modem hybris; do
+		for folder in cross main kde maemo modem hybris; do
 			# Folder's packages
 			echo ":: $arch $folder"
 			packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"
@@ -84,7 +88,7 @@ while true; do
 		# Device kernels
 		echo ":: $arch device kernels"
 		pmb build --strict --arch="$arch" \
-			$(get_packages "device" "$arch")
+			$($DIR/get_packages.py --folder "device" "$arch")
 
 		# Device packages with --ignore-depends so they
 		# don't pull in the firmware packages
