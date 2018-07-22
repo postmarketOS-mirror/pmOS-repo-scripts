@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 # Copyright 2018 Oliver Smith
 #
 # This file is part of pmOS-repository-scripts.
@@ -34,7 +34,7 @@ pmb() {
 			# HACK: often cmake is the issue
 			# this can be removed when pmbootstrap is able to kill
 			# running processes in the chroots
-			sudo killall cmake
+			: sudo killall cmake
 			echo "COMMAND FAILED!"
 		fi
 	done
@@ -47,12 +47,6 @@ get_packages_device() {
 	  grep '^deviceinfo_arch=' $(find device -name 'deviceinfo') | grep "$1" | cut -d '/' -f 2 )
 }
 
-# Check for loop mode
-if [ "$1" != "--loop" ]; then
-	echo "NOTE: Pass '--loop' to run in loop mode!"
-	set -e
-fi
-
 # Update the pmbootstrap repository
 echo ":: update pmbootstrap repository"
 cd "$DIR/data/pmbootstrap"
@@ -60,42 +54,40 @@ git pull || exit 1
 
 # Build all packages
 arches="x86_64 armhf aarch64 x86"
-while true; do
-	cd "$DIR/data/pmbootstrap/aports"
 
-	# All arches
-	for arch in $arches; do
-		for folder in cross main kde maemo modem hybris; do
-			# Folder's packages
-			echo ":: $arch $folder"
-			packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"
+cd "$DIR/data/pmbootstrap/aports"
 
-			# Remove gcc-* from packages
-			# Workaround: Compiling gcc-x86_64 for armhf (gcc-* for non-native arch in
-			# general) pulls in build-base-armhf for some reason, does not use distcc
-			# (because gcc compiles itself, and this makes it run in pure qemu, which
-			# is super slow), and just fails to compile after two hours. So let's
-			# disable it. If someone needs to cross-compile from armhf to x86_64, the
-			# package will be built automatically by pmbootstrap on armhf.
-			if [ "$folder" == "cross" ]; then
-				for arch_package in $arches; do
-					packages="$(echo "$packages" | grep -v "gcc-$arch_package")"
-				done
-			fi
+# All arches
+for arch in $arches; do
+	for folder in cross main kde maemo modem hybris; do
+		# Folder's packages
+		echo ":: $arch $folder"
+		packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"
 
-			pmb build --strict --arch="$arch" $packages
-		done
-		# Device kernels
-		echo ":: $arch device kernels"
-		pmb build --strict --arch="$arch" \
-			$($DIR/get_packages.py --folder "device" "$arch")
+		# Remove gcc-* from packages
+		# Workaround: Compiling gcc-x86_64 for armhf (gcc-* for non-native arch in
+		# general) pulls in build-base-armhf for some reason, does not use distcc
+		# (because gcc compiles itself, and this makes it run in pure qemu, which
+		# is super slow), and just fails to compile after two hours. So let's
+		# disable it. If someone needs to cross-compile from armhf to x86_64, the
+		# package will be built automatically by pmbootstrap on armhf.
+		if [ "$folder" == "cross" ]; then
+			for arch_package in $arches; do
+				packages="$(echo "$packages" | grep -v "gcc-$arch_package")"
+			done
+		fi
 
-		# Device packages with --ignore-depends so they
-		# don't pull in the firmware packages
-		echo ":: $arch device packages"
-		pmb build --ignore-depends --arch="$arch" \
-			$(get_packages_device "$arch")
+		pmb build --strict --arch="$arch" $packages
 	done
-	[ "$1" != "--loop" ] && break
-	sleep 60
+	# Device kernels
+	echo ":: $arch device kernels"
+	pmb build --strict --arch="$arch" \
+		$($DIR/get_packages.py --folder "device" "$arch")
+
+	# Device packages with --ignore-depends so they
+	# don't pull in the firmware packages
+	echo ":: $arch device packages"
+	pmb build --ignore-depends --arch="$arch" \
+		$(get_packages_device "$arch")
 done
+
