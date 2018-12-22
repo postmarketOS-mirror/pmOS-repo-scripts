@@ -31,11 +31,17 @@ pmb() {
 			success="true"
 			break
 		else
+			echo "COMMAND FAILED!"
+			sleep 5
+
+			# HACK: kill processes that may get stuck
 			# HACK: often cmake is the issue
 			# this can be removed when pmbootstrap is able to kill
 			# running processes in the chroots
-			: sudo killall cmake
-			echo "COMMAND FAILED!"
+
+			# cmake often gets stuck when compiling in a foreign arch chroot
+			: sudo killall -9 cmake
+			sleep 5
 		fi
 	done
 }
@@ -52,14 +58,25 @@ echo ":: update pmbootstrap repository"
 cd "$DIR/data/pmbootstrap"
 git pull || exit 1
 
-# Build all packages
-arches="x86_64 armhf aarch64 x86"
+# Update the pmaports repository
+echo ":: update pmaports repository"
+cd "$DIR/data/pmbootstrap/aports"
+git pull || exit 1
 
+
+# Build cross compilers first, and only for x86_64 (see note below)
+cd "$DIR/data/pmbootstrap/aports/cross"
+for package in gcc-*; do
+	pmb build --strict "$package"
+done
+
+# Build all packages
+arches="x86_64 armhf aarch64"
 cd "$DIR/data/pmbootstrap/aports"
 
 # All arches
 for arch in $arches; do
-	for folder in cross main kde maemo modem hybris; do
+	for folder in cross main kde maemo modem hybris temp; do
 		# Folder's packages
 		echo ":: $arch $folder"
 		packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"

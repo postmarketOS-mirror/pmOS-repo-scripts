@@ -43,6 +43,10 @@ yes "" | ./pmb_repo.sh init
 # Symlink caches
 for i in ~/.local/var/pmbootstrap/cache_*; do
 	[ -e "$i" ] || break
+
+	# Don't symlink cache_git, because it holds the pmaports
+	[ "$(basename "$i")" = "cache_git" ] && continue
+
 	target="$DIR/data/work/$(basename "$i")"
 	[ -e "$target" ] && continue
 	ln -sv "$i" "$target"

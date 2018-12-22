@@ -40,3 +40,5 @@ rsync \
 # Delete outdated ones
 echo ":: Delete outdated packages from repository"
 "$DIR/data/pmb_repo.sh" -y zap -m
+
+echo ":: Remember to run 'build_all.sh' again, just to make sure."
