@@ -76,7 +76,7 @@ cd "$DIR/data/pmbootstrap/aports"
 
 # All arches
 for arch in $arches; do
-	for folder in cross main kde maemo modem hybris temp; do
+	for folder in cross main kde maemo modem hybris temp device firmware; do
 		# Folder's packages
 		echo ":: $arch $folder"
 		packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"
@@ -96,19 +96,5 @@ for arch in $arches; do
 
 		pmb build --strict --arch="$arch" $packages
 	done
-	# Device kernels
-	echo ":: $arch device kernels"
-	kernels="$($DIR/get_packages.py --folder "device" "$arch")"
-	if [ -n "$kernels" ]; then
-		pmb build --strict --arch="$arch" $kernels
-	fi
-
-	# Device packages with --ignore-depends so they
-	# don't pull in the firmware packages
-	echo ":: $arch device packages"
-	devicepkgs="$(get_packages_device "$arch")"
-	if [ -n "$devicepkgs" ]; then
-		pmb build --ignore-depends --arch="$arch" $devicepkgs
-	fi
 done
 
