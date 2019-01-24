@@ -40,7 +40,7 @@ pmb() {
 			# running processes in the chroots
 
 			# cmake often gets stuck when compiling in a foreign arch chroot
-			: sudo killall -9 cmake
+			: sudo killall -9 cmake gpg-agent
 			sleep 5
 		fi
 	done
@@ -71,7 +71,7 @@ for package in gcc-*; do
 done
 
 # Build all packages
-arches="x86_64 armhf aarch64"
+arches="x86_64 armhf aarch64 armv7 x86"
 cd "$DIR/data/pmbootstrap/aports"
 
 # All arches
@@ -98,13 +98,17 @@ for arch in $arches; do
 	done
 	# Device kernels
 	echo ":: $arch device kernels"
-	pmb build --strict --arch="$arch" \
-		$($DIR/get_packages.py --folder "device" "$arch")
+	kernels="$($DIR/get_packages.py --folder "device" "$arch")"
+	if [ -n "$kernels" ]; then
+		pmb build --strict --arch="$arch" $kernels
+	fi
 
 	# Device packages with --ignore-depends so they
 	# don't pull in the firmware packages
 	echo ":: $arch device packages"
-	pmb build --ignore-depends --arch="$arch" \
-		$(get_packages_device "$arch")
+	devicepkgs="$(get_packages_device "$arch")"
+	if [ -n "$devicepkgs" ]; then
+		pmb build --ignore-depends --arch="$arch" $devicepkgs
+	fi
 done
 
