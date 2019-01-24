@@ -94,6 +94,11 @@ for arch in $arches; do
 			done
 		fi
 
+        if [ -z "$packages" ]; then
+            echo "no packages found for $folder $arch, skipping."
+            continue
+        fi
+
 		pmb build --strict --arch="$arch" $packages
 	done
 done
