@@ -71,7 +71,7 @@ for package in gcc-*; do
 done
 
 # Build all packages
-arches="x86_64 armhf aarch64 armv7 x86"
+arches="x86_64 armhf aarch64 armv7"
 cd "$DIR/data/pmbootstrap/aports"
 
 # All arches
