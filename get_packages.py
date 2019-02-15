@@ -53,6 +53,11 @@ def check_arches(apkbuild, arches):
     line_arch = line_arch.replace("\"", "")
     arches_aport = line_arch.split(" ")
 
+    # First check for !aarch64 etc. entries
+    for arch in arches:
+        if "!" + arch in arches_aport:
+            return False
+
     # Compare with given arches
     for arch in arches:
         if arch in arches_aport:
