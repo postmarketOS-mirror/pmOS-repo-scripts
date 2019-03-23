@@ -56,6 +56,7 @@ while true; do
 		--info=progress2 \
 		--human-readable \
 		--recursive \
+		--size-only \
 		--delete \
 		"$PACKAGES"/* \
 		"$SNAPSHOT"
