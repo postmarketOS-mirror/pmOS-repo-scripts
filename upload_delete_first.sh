@@ -73,6 +73,7 @@ while true; do
 				--delete-before \
 				--include="*/*.apk,*/APKINDEX.tar.gz README.html" \
 				--filter="P .htaccess" \
+				--filter="P postmarketos" \
 				. \
 				"$dest" \
 				&& break

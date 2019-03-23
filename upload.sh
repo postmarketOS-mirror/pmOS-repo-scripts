@@ -33,6 +33,9 @@ initial="true"
 while true; do
 	# Wait for changed APKINDEXes
 	if [ "$initial" == "false" ]; then
+		echo ":: Sleeping one minute, because the APKINDEX change detection doesn't always work ..."
+		# it fails when the file size is the same, but the file changed
+		sleep 60
 		echo ":: Waiting for changed APKINDEXes"
 		while true; do
 			changes="false"
@@ -53,7 +56,6 @@ while true; do
 		--info=progress2 \
 		--human-readable \
 		--recursive \
-		--size-only \
 		--delete \
 		"$PACKAGES"/* \
 		"$SNAPSHOT"
@@ -76,6 +78,7 @@ while true; do
 				--delete-after \
 				--include="*/*.apk,*/APKINDEX.tar.gz README.html" \
 				--filter="P .htaccess" \
+				--filter="P postmarketos" \
 				. \
 				"$dest" \
 				&& break
