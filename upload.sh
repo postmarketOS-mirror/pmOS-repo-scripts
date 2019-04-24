@@ -80,6 +80,7 @@ while true; do
 				--include="*/*.apk,*/APKINDEX.tar.gz README.html" \
 				--filter="P .htaccess" \
 				--filter="P postmarketos" \
+				--filter="P image" \
 				. \
 				"$dest" \
 				&& break
