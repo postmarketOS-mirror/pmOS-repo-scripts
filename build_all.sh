@@ -76,7 +76,7 @@ cd "$DIR/data/pmbootstrap/aports"
 
 # All arches
 for arch in $arches; do
-	for folder in cross main kde unity8 maemo modem hybris temp coreapps device firmware; do
+	for folder in cross main temp kde unity8 maemo phosh modem hybris device firmware; do
 		# Folder's packages
 		echo ":: $arch $folder"
 		packages="$($DIR/get_packages.py --folder $folder $arch all noarch)"
